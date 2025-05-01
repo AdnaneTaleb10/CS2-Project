@@ -130,3 +130,14 @@ captureBtn.addEventListener("click", () => {
   link.download = "mnist_digit.png";
   link.click();
 });
+
+clearBtn.addEventListener("click", () => {
+  // Clear the entire canvas (remove user drawing)
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Redraw the 28x28 guide grid
+  drawGrid();
+
+  // Reset previous cell to avoid skip issues on new drawing
+  prevCell = { x: -1, y: -1 };
+});
