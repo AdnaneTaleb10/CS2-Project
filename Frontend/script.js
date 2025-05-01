@@ -82,3 +82,51 @@ canvas.addEventListener("mousemove", (e) => {
 
   fillCell(x, y); // Fill the cell under the mouse
 });
+
+captureBtn.addEventListener("click", () => {
+  // Step 1: Create a hidden 28x28 canvas for MNIST-style formatting
+  const hiddenCanvas = document.createElement("canvas");
+  hiddenCanvas.width = 28;
+  hiddenCanvas.height = 28;
+  const hiddenCtx = hiddenCanvas.getContext("2d");
+
+  // Step 2: Fill the background with white (MNIST standard: white background, black digits)
+  hiddenCtx.fillStyle = "white";
+  hiddenCtx.fillRect(0, 0, 28, 28);
+
+  // Step 3: Draw the main canvas content onto the hidden canvas, scaling it down to 28x28
+  hiddenCtx.drawImage(canvas, 0, 0, 28, 28);
+
+  // Step 4: Get pixel data from the hidden canvas
+  let imageData = hiddenCtx.getImageData(0, 0, 28, 28);
+  let pixels = imageData.data;
+
+  // Step 5: Convert each pixel to grayscale and invert colors
+  for (let i = 0; i < pixels.length; i += 4) {
+    let r = pixels[i];
+    let g = pixels[i + 1];
+    let b = pixels[i + 2];
+
+    // Average RGB to get grayscale value
+    let gray = (r + g + b) / 3;
+
+    // Invert grayscale (MNIST has black digits on white)
+    gray = 255 - gray;
+
+    // Apply the inverted grayscale value to RGB channels
+    pixels[i] = pixels[i + 1] = pixels[i + 2] = gray;
+    pixels[i + 3] = 255; // Fully opaque
+  }
+
+  // Step 6: Put the updated grayscale image back into the hidden canvas
+  hiddenCtx.putImageData(imageData, 0, 0);
+
+  // Step 7: Export the hidden canvas as a PNG data URL
+  const imageURL = hiddenCanvas.toDataURL("image/png");
+
+  // Step 8: Trigger download of the image (for testing or saving)
+  const link = document.createElement("a");
+  link.href = imageURL;
+  link.download = "mnist_digit.png";
+  link.click();
+});
