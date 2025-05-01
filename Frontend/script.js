@@ -37,3 +37,48 @@ function drawGrid() {
     ctx.stroke();
   }
 }
+
+// Convert pixel coordinates to grid cell coordinates
+function getGridPosition(x, y) {
+  return {
+    col: Math.floor(x / gridSize), // Column index in 28x28 grid
+    row: Math.floor(y / gridSize), // Row index in 28x28 grid
+  };
+}
+
+// Fill the corresponding cell on the canvas
+function fillCell(x, y) {
+  const { col, row } = getGridPosition(x, y);
+
+  // Only fill if the cell is different from the last one
+  if (prevCell.x !== col || prevCell.y !== row) {
+    prevCell = { x: col, y: row };
+
+    ctx.fillStyle = "black"; // Draw in black
+    ctx.fillRect(col * gridSize, row * gridSize, gridSize, gridSize);
+  }
+}
+
+// Set drawing mode to true when mouse is pressed
+canvas.addEventListener("mousedown", () => {
+  isMouseDown = true;
+});
+
+// Stop drawing when mouse is released or leaves canvas
+canvas.addEventListener("mouseup", () => {
+  isMouseDown = false;
+});
+canvas.addEventListener("mouseleave", () => {
+  isMouseDown = false;
+});
+
+// When the mouse moves over the canvas while pressed, draw
+canvas.addEventListener("mousemove", (e) => {
+  if (!isMouseDown) return; // Only draw if mouse is pressed
+
+  const rect = canvas.getBoundingClientRect(); // Canvas position on screen
+  const x = e.clientX - rect.left;  // Mouse X within canvas
+  const y = e.clientY - rect.top;   // Mouse Y within canvas
+
+  fillCell(x, y); // Fill the cell under the mouse
+});
