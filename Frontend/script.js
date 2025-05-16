@@ -205,3 +205,4 @@ submitBtn.addEventListener("click", () => {
   }, 'image/png'); // Specify PNG format
 });
 
+drawGrid();
