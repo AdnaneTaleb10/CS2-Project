@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <title>Digit Recognition</title>
+</head>
+<body>
+    
+    <div class="app">
+        <h1>Handwritten Digit Recognizer</h1>
+
+        <div class="board">
+            <canvas id="canvas" height="600" width="600"></canvas>
+            <canvas id="hiddenCanvas" width="28" height="28" style="display:none;"></canvas>
+    
+            
+            <div class="control">
+                <div class="button" id="capture">
+                    <i class="fa-solid fa-expand"></i>
+                    Capture
+                </div>
+    
+                <div class="button" id="clear">
+                    <i class="fa-solid fa-eraser"></i>
+                    Clear
+                </div>
+    
+                <div class="button" id="submit">
+                    <i class="fa-solid fa-circle-check"></i>
+                    Submit
+                </div>
+            </div>
+        </div>
+
+        <div class="result">
+            <p class="result-text">Looks like you wrote a : <span id="predicted-digit"></span></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
