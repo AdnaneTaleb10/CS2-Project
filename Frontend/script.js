@@ -141,3 +141,67 @@ clearBtn.addEventListener("click", () => {
   // Reset previous cell to avoid skip issues on new drawing
   prevCell = { x: -1, y: -1 };
 });
+
+submitBtn.addEventListener("click", () => {
+  // Show loading message while prediction is in progress
+  const resultEl = document.getElementById("predicted-digit");
+  resultEl.textContent = "Predicting...";
+
+  // Create a hidden 28x28 canvas to format the drawing for model input
+  const hiddenCanvas = document.createElement("canvas");
+  hiddenCanvas.width = 28;
+  hiddenCanvas.height = 28;
+  const hiddenCtx = hiddenCanvas.getContext("2d");
+
+  // Step 1: Fill the background with white (MNIST standard)
+  hiddenCtx.fillStyle = "white";
+  hiddenCtx.fillRect(0, 0, 28, 28);
+
+  // Step 2: Resize and draw the user's canvas into the hidden 28x28 canvas
+  hiddenCtx.drawImage(canvas, 0, 0, 28, 28);
+
+  // Step 3: Get and process pixel data for grayscale + inversion
+  let imageData = hiddenCtx.getImageData(0, 0, 28, 28);
+  let pixels = imageData.data;
+
+  for (let i = 0; i < pixels.length; i += 4) {
+    let gray = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3; // Grayscale
+    gray = 255 - gray; // Invert for MNIST
+
+    pixels[i] = pixels[i + 1] = pixels[i + 2] = gray; // Apply grayscale
+    pixels[i + 3] = 255; // Fully opaque
+  }
+
+  // Step 4: Put the processed data back into the canvas
+  hiddenCtx.putImageData(imageData, 0, 0);
+
+  // Step 5: Convert the hidden canvas to a Blob and prepare form data
+  hiddenCanvas.toBlob((blob) => {
+    const formData = new FormData();
+    formData.append('image', blob, 'digit.png'); // Name must match Flask backend field
+
+    // Step 6: Send image to Flask backend via POST request
+    fetch('http://127.0.0.1:5000/predict', {
+      method: 'POST',
+      body: formData,
+      cache: 'no-cache'
+    })
+      .then(response => response.json()) // Parse JSON response
+      .then(data => {
+        // Step 7: Display prediction result
+        if (data.digit !== undefined) {
+          resultEl.textContent = `${data.digit}`; // Show predicted digit
+        } else if (data.error) {
+          resultEl.textContent = `Error: ${data.error}`; // Show backend error
+        } else {
+          resultEl.textContent = 'Unexpected error'; // Catch-all
+        }
+      })
+      .catch(error => {
+        // Network or unexpected error handling
+        resultEl.textContent = 'Error during prediction';
+        console.error('Prediction error:', error);
+      });
+  }, 'image/png'); // Specify PNG format
+});
+
